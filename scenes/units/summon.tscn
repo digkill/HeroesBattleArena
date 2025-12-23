@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/summon.gd" id="1_iy47b"]
+
+[sub_resource type="BoxShape3D" id="1"]
+size = Vector3(0.7, 1.0, 0.7)
+
+[sub_resource type="BoxMesh" id="2"]
+size = Vector3(0.7, 1.0, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="3"]
+albedo_color = Color(0.3, 0.9, 0.5, 1)
+
+[node name="Summon" type="CharacterBody3D"]
+script = ExtResource("1_iy47b")
+collision_layer = 2
+collision_mask = 3
+move_speed = 5.2
+max_health = 120.0
+attack_damage = 16.0
+attack_range = 1.6
+attack_cooldown = 1.2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("2")
+material_override = SubResource("3")

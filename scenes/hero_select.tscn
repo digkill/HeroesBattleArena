@@ -1,0 +1,97 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/hero_select.gd" id="1_0t1d2"]
+
+[node name="HeroSelect" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_0t1d2")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.08, 0.08, 0.1, 1)
+
+[node name="Panel" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360
+offset_top = -240
+offset_right = 360
+offset_bottom = 240
+
+[node name="Title" type="Label" parent="Panel"]
+anchor_left = 0.0
+anchor_right = 1.0
+offset_top = 16
+offset_bottom = 48
+horizontal_alignment = 1
+text = "Hero Selection"
+
+[node name="HeroCard" type="Button" parent="Panel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160
+offset_top = -80
+offset_right = 160
+offset_bottom = 60
+text = "Rakshasa"
+
+[node name="HeroNote" type="Label" parent="Panel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200
+offset_top = 70
+offset_right = 200
+offset_bottom = 110
+horizontal_alignment = 1
+text = "Main attribute: Agility | Ultimate: Summon Pack"
+
+[node name="SelectionLabel" type="Label" parent="Panel"]
+anchor_left = 0.0
+anchor_right = 1.0
+offset_top = 140
+offset_bottom = 170
+horizontal_alignment = 1
+text = "Selected: Rakshasa"
+
+[node name="SideLabel" type="Label" parent="Panel"]
+anchor_left = 0.0
+anchor_right = 1.0
+offset_top = 176
+offset_bottom = 200
+horizontal_alignment = 1
+text = "Side: Sunrise"
+
+[node name="SideButtons" type="HBoxContainer" parent="Panel"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200
+offset_right = 200
+offset_top = 206
+offset_bottom = 246
+
+[node name="SunriseButton" type="Button" parent="Panel/SideButtons"]
+custom_minimum_size = Vector2(180, 36)
+text = "Sunrise (Light)"
+
+[node name="SunsetButton" type="Button" parent="Panel/SideButtons"]
+custom_minimum_size = Vector2(180, 36)
+text = "Sunset (Dark)"
+
+[node name="StartButton" type="Button" parent="Panel"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -120
+offset_right = 120
+offset_top = -72
+offset_bottom = -28
+text = "Start Match"

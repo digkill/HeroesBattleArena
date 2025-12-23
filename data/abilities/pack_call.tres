@@ -1,0 +1,13 @@
+[gd_resource type="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ability_definition.gd" id="1_9p3n4"]
+
+[resource]
+script = ExtResource("1_9p3n4")
+ability_id = &"pack_call"
+display_name = "Pack Call"
+hotkey_label = "R"
+mana_cost = 100.0
+cooldown = 40.0
+animation = &"cast_r"
+description = "Summon a pack of allies to fight for you."

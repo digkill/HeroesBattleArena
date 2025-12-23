@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://b8mnvinrf1tiv"]
+
+[ext_resource type="Script" uid="uid://7loycu4i5a47" path="res://scripts/hero.gd" id="1_8v7k0"]
+[ext_resource type="PackedScene" uid="uid://crume5kfximta" path="res://assets/models/heroes/Rakshasa/Rakshasa.glb" id="2_2g4if"]
+[ext_resource type="HeroDefinition" path="res://data/heroes/rakshasa.tres" id="3_1i7s8"]
+
+[sub_resource type="CapsuleShape3D" id="1"]
+height = 1.6
+
+[node name="RakshasaHero" type="CharacterBody3D"]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_8v7k0")
+hero_def = ExtResource("3_1i7s8")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 1.9, 0)
+shape = SubResource("1")
+
+[node name="RakshasaModel" parent="." instance=ExtResource("2_2g4if")]
+transform = Transform3D(-0.9848077, 0, -0.17364822, 0, 1, 0, 0.17364822, 0, -0.9848077, 0, 0, 0)

@@ -1,0 +1,47 @@
+[gd_resource type="HeroDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/hero_definition.gd" id="1_5v2ah"]
+[ext_resource type="PackedScene" path="res://assets/models/heroes/Rakshasa/Rakshasa.glb" id="2_6y2k9"]
+[ext_resource type="Resource" path="res://data/abilities/shadow_slash.tres" id="3_3sv43"]
+[ext_resource type="Resource" path="res://data/abilities/smoke_bomb.tres" id="4_r4m1c"]
+[ext_resource type="Resource" path="res://data/abilities/razor_shuriken.tres" id="5_a8q1d"]
+[ext_resource type="Resource" path="res://data/abilities/pack_call.tres" id="6_b7n9k"]
+
+[resource]
+script = ExtResource("1_5v2ah")
+hero_id = &"rakshasa"
+display_name = "Rakshasa"
+main_attribute = &"agility"
+model_scene = ExtResource("2_6y2k9")
+model_node_path = NodePath("RakshasaModel")
+model_offset = Vector3(0, 0, 0)
+model_rotation_degrees = Vector3(0, 0, 0)
+model_scale = Vector3(1, 1, 1)
+base_strength = 18.0
+base_agility = 22.0
+base_intelligence = 16.0
+strength_gain = 2.1
+agility_gain = 2.8
+intelligence_gain = 1.7
+base_attack_damage = 22.0
+base_attack_cooldown = 1.6
+base_move_speed = 6.0
+abilities = [ExtResource("3_3sv43"), ExtResource("4_r4m1c"), ExtResource("5_a8q1d"), ExtResource("6_b7n9k")]
+anim_idle = &"Idle"
+anim_move = &"Run"
+anim_attack = &"Attack"
+anim_cast = &"Cast"
+anim_death = &"Death"
+anim_hit = &"Hit"
+anim_jump = &"Jump"
+anim_skill1 = &"Skill1"
+anim_skill2 = &"Skill2"
+anim_skill3 = &"Skill3"
+anim_skill4 = &"Skill4"
+anim_ultimate = &"Ultimate"
+anim_teleportation = &"Teleportation"
+anim_stun = &"Stun"
+anim_won = &"Won"
+anim_fall = &"Fall"
+anim_loss = &"Loss"
+anim_use_item = &"UseItem"

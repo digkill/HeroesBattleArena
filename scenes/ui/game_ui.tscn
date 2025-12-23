@@ -1,0 +1,220 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/game_ui.gd" id="1_wg1xv"]
+[ext_resource type="Script" path="res://scripts/minimap.gd" id="2_mx2y9"]
+
+[node name="GameUI" type="CanvasLayer"]
+script = ExtResource("1_wg1xv")
+
+[node name="HUD" type="Panel" parent="."]
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 0
+offset_top = -180
+offset_right = 0
+offset_bottom = 0
+
+[node name="HealthBar" type="ProgressBar" parent="HUD"]
+anchor_left = 0.02
+anchor_right = 0.32
+offset_top = 12
+offset_bottom = 36
+value = 100
+
+[node name="ManaBar" type="ProgressBar" parent="HUD"]
+anchor_left = 0.02
+anchor_right = 0.32
+offset_top = 44
+offset_bottom = 68
+value = 50
+
+[node name="XPBar" type="ProgressBar" parent="HUD"]
+anchor_left = 0.02
+anchor_right = 0.32
+offset_top = 76
+offset_bottom = 96
+value = 0
+
+[node name="GoldLabel" type="Label" parent="HUD"]
+anchor_left = 0.35
+anchor_right = 0.52
+offset_top = 12
+offset_bottom = 36
+text = "Gold: 600"
+
+[node name="LevelLabel" type="Label" parent="HUD"]
+anchor_left = 0.35
+anchor_right = 0.52
+offset_top = 40
+offset_bottom = 64
+text = "Level: 1"
+
+[node name="StatLabel" type="Label" parent="HUD"]
+anchor_left = 0.35
+anchor_right = 0.7
+offset_top = 68
+offset_bottom = 92
+text = "STR 18  AGI 22  INT 16"
+
+[node name="Abilities" type="HBoxContainer" parent="HUD"]
+anchor_left = 0.02
+anchor_right = 0.7
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 0
+offset_right = 0
+offset_top = -70
+offset_bottom = -12
+
+[node name="Ability1" type="Button" parent="HUD/Abilities"]
+custom_minimum_size = Vector2(120, 48)
+text = "Q Shadow Slash"
+
+[node name="Cooldown" type="Label" parent="HUD/Abilities/Ability1"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -12
+offset_top = -12
+offset_right = 12
+offset_bottom = 12
+horizontal_alignment = 1
+
+[node name="Ability2" type="Button" parent="HUD/Abilities"]
+custom_minimum_size = Vector2(120, 48)
+text = "W Smoke Bomb"
+
+[node name="Cooldown" type="Label" parent="HUD/Abilities/Ability2"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -12
+offset_top = -12
+offset_right = 12
+offset_bottom = 12
+horizontal_alignment = 1
+
+[node name="Ability3" type="Button" parent="HUD/Abilities"]
+custom_minimum_size = Vector2(120, 48)
+text = "E Razor Shuriken"
+
+[node name="Cooldown" type="Label" parent="HUD/Abilities/Ability3"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -12
+offset_top = -12
+offset_right = 12
+offset_bottom = 12
+horizontal_alignment = 1
+
+[node name="Ability4" type="Button" parent="HUD/Abilities"]
+custom_minimum_size = Vector2(120, 48)
+text = "R Pack Call"
+
+[node name="Cooldown" type="Label" parent="HUD/Abilities/Ability4"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -12
+offset_top = -12
+offset_right = 12
+offset_bottom = 12
+horizontal_alignment = 1
+
+[node name="Items" type="HBoxContainer" parent="HUD"]
+anchor_left = 0.72
+anchor_right = 0.98
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 0
+offset_right = 0
+offset_top = -70
+offset_bottom = -12
+
+[node name="Item1" type="Button" parent="HUD/Items"]
+custom_minimum_size = Vector2(110, 48)
+text = "-"
+
+[node name="Item2" type="Button" parent="HUD/Items"]
+custom_minimum_size = Vector2(110, 48)
+text = "-"
+
+[node name="Item3" type="Button" parent="HUD/Items"]
+custom_minimum_size = Vector2(110, 48)
+text = "-"
+
+[node name="ShopPanel" type="Panel" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -320
+offset_top = -260
+offset_right = -20
+offset_bottom = 260
+
+[node name="Title" type="Label" parent="ShopPanel"]
+anchor_left = 0.0
+anchor_right = 1.0
+offset_top = 12
+offset_bottom = 36
+horizontal_alignment = 1
+text = "Shop (B)"
+
+[node name="Scroll" type="ScrollContainer" parent="ShopPanel"]
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_left = 12
+offset_top = 44
+offset_right = -12
+offset_bottom = -12
+
+[node name="ShopList" type="VBoxContainer" parent="ShopPanel/Scroll"]
+
+[node name="Minimap" type="Control" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -260
+offset_top = 20
+offset_right = -20
+offset_bottom = 260
+mouse_filter = 2
+script = ExtResource("2_mx2y9")
+camera_rig_path = NodePath("../../CameraRig")
+world_min = Vector3(-90, 0, -90)
+world_max = Vector3(90, 0, 90)
+minimap_size = Vector2i(240, 240)
+
+[node name="Frame" type="Panel" parent="Minimap"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="Minimap/Frame"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Overlay" type="Control" parent="Minimap/Frame"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="CameraRect" type="Panel" parent="Minimap/Frame"]
+mouse_filter = 2
+
+[node name="SubViewport" type="SubViewport" parent="Minimap"]
+size = Vector2i(240, 240)
+render_target_update_mode = 2
+
+[node name="MinimapCamera" type="Camera3D" parent="Minimap/SubViewport"]

@@ -1,0 +1,16 @@
+[gd_resource type="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ability_definition.gd" id="1_7s8a2"]
+
+[resource]
+script = ExtResource("1_7s8a2")
+ability_id = &"shadow_slash"
+display_name = "Shadow Slash"
+hotkey_label = "Q"
+mana_cost = 35.0
+cooldown = 8.0
+range = 7.0
+radius = 2.5
+damage = 55.0
+animation = &"cast_q"
+description = "Dash and slash enemies around the target."
