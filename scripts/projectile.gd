@@ -22,6 +22,8 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node) -> void:
 	if body is Unit:
 		if body.team != team:
-			var source: Node = source_unit if source_unit != null else self
+			var source: Node = self
+			if source_unit != null:
+				source = source_unit
 			body.take_damage(damage, source)
 			queue_free()

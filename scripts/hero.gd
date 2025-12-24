@@ -83,8 +83,9 @@ func _ready() -> void:
 	apply_hero_definition()
 	recalculate_stats()
 	super._ready()
-	setup_animation()
 	apply_model_transform()
+	# Ищем AnimationPlayer после применения модели
+	setup_animation()
 	gold_changed.emit(gold)
 	xp_changed.emit(xp, xp_to_next)
 	level_changed.emit(level)
@@ -134,7 +135,13 @@ func apply_hero_definition() -> void:
 	anim_use_item = hero_def.anim_use_item
 
 func setup_animation() -> void:
-	anim_player = find_child("AnimationPlayer", true, false) as AnimationPlayer
+	# Ищем AnimationPlayer в модели или в дочерних узлах
+	if model_root != null:
+		anim_player = model_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if anim_player == null:
+		anim_player = find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if anim_player == null:
+		push_warning("AnimationPlayer not found for hero: " + hero_name)
 
 func apply_model_transform() -> void:
 	if hero_def == null:
@@ -158,7 +165,7 @@ func find_model_root() -> Node3D:
 		var model: Node3D = node as Node3D
 		if model != null:
 			return model
-	var fallback: Node3D
+	var fallback: Node3D = null
 	for child in get_children():
 		var node3d: Node3D = child as Node3D
 		if node3d == null:
@@ -301,13 +308,19 @@ func update_animation_state(delta: float) -> void:
 		action_anim_timer = max(0.0, action_anim_timer - delta)
 		if action_anim_timer > 0.0:
 			return
+	# Определяем, какая анимация движения использовать
 	if velocity.length() > 0.1 or has_move_target:
-		play_animation(anim_move)
+		var move_anim := anim_move
+		# Пытаемся использовать Running, если доступна
+		if anim_player != null:
+			var running_anim_name := String(anim_move).replace("Walking", "Running")
+			if anim_player.has_animation(running_anim_name):
+				move_anim = StringName(running_anim_name)
+		play_animation(move_anim)
 	else:
 		play_animation(anim_idle)
 
-func play_action_animation(name: StringName) -> void:
-	var anim_name: StringName = name
+func play_action_animation(anim_name: StringName) -> void:
 	if anim_name == StringName():
 		anim_name = anim_cast
 	if anim_name == StringName():
@@ -318,23 +331,68 @@ func play_action_animation(name: StringName) -> void:
 	action_anim_timer = max(action_anim_timer, length)
 	play_animation(anim_name)
 
-func play_animation(name: StringName) -> void:
-	if anim_player == null or name == StringName():
+func play_animation(anim_name: StringName) -> void:
+	if anim_player == null or anim_name == StringName():
 		return
-	if name == current_anim:
+	if anim_name == current_anim:
 		return
-	var anim_key: String = String(name)
+	
+	var anim_key: String = String(anim_name)
+	
+	# Проверяем, что AnimationPlayer валиден
+	if not is_instance_valid(anim_player):
+		return
+	
+	# Пытаемся найти анимацию с точным именем
 	if not anim_player.has_animation(anim_key):
-		return
+		# Если не найдено, пытаемся найти с префиксом "Armature|"
+		if not anim_key.begins_with("Armature|"):
+			var prefixed_name := "Armature|" + anim_key
+			if anim_player.has_animation(prefixed_name):
+				anim_key = prefixed_name
+			else:
+				# Если и с префиксом не найдено, возвращаемся
+				return
+		else:
+			# Если уже есть префикс, но не найдено, пробуем без префикса
+			if anim_key.length() > 9:
+				var unprefixed_name := anim_key.substr(9)  # Убираем "Armature|"
+				if anim_player.has_animation(unprefixed_name):
+					anim_key = unprefixed_name
+				else:
+					return
+			else:
+				return
+	
+	# Воспроизводим анимацию
 	anim_player.play(anim_key)
-	current_anim = name
+	current_anim = anim_name
 
-func get_animation_length(name: StringName) -> float:
-	if anim_player == null:
+func get_animation_length(anim_name: StringName) -> float:
+	if anim_player == null or not is_instance_valid(anim_player):
 		return 0.0
-	var anim_key: String = String(name)
+	var anim_key: String = String(anim_name)
+	
+	# Пытаемся найти анимацию с точным именем
 	if not anim_player.has_animation(anim_key):
-		return 0.0
+		# Если не найдено, пытаемся найти с префиксом "Armature|"
+		if not anim_key.begins_with("Armature|"):
+			var prefixed_name := "Armature|" + anim_key
+			if anim_player.has_animation(prefixed_name):
+				anim_key = prefixed_name
+			else:
+				return 0.0
+		else:
+			# Если уже есть префикс, но не найдено, пробуем без префикса
+			if anim_key.length() > 9:
+				var unprefixed_name := anim_key.substr(9)  # Убираем "Armature|"
+				if anim_player.has_animation(unprefixed_name):
+					anim_key = unprefixed_name
+				else:
+					return 0.0
+			else:
+				return 0.0
+	
 	var anim: Animation = anim_player.get_animation(anim_key)
 	if anim == null:
 		return 0.0
@@ -410,12 +468,12 @@ func cast_ability(index: int) -> void:
 			ability_dismember(ability)
 
 func ability_shadow_slash(target_pos: Vector3, ability: AbilityDefinition) -> void:
-	var range: float = ability.range
+	var ability_range: float = ability.ability_range
 	var direction: Vector3 = target_pos - global_position
 	direction.y = 0.0
 	if direction.length() < 0.1:
 		direction = -transform.basis.z
-	var distance: float = min(range, direction.length())
+	var distance: float = min(ability_range, direction.length())
 	var dash_target: Vector3 = global_position + direction.normalized() * distance
 	global_position = dash_target
 
@@ -464,13 +522,13 @@ func ability_pack_call() -> void:
 		get_parent().add_child(summon)
 
 func ability_meat_hook(target_pos: Vector3, ability: AbilityDefinition) -> void:
-	var range: float = ability.range
+	var ability_range: float = ability.ability_range
 	var direction: Vector3 = target_pos - global_position
 	direction.y = 0.0
 	if direction.length() < 0.1:
 		direction = -transform.basis.z
 	var origin: Vector3 = global_position + Vector3.UP * 1.2
-	var to: Vector3 = origin + direction.normalized() * range
+	var to: Vector3 = origin + direction.normalized() * ability_range
 	var query := PhysicsRayQueryParameters3D.create(origin, to)
 	query.exclude = [self]
 	query.collision_mask = 3
@@ -516,7 +574,7 @@ func ability_dismember(ability: AbilityDefinition) -> void:
 		return
 	if unit is Building:
 		return
-	if ability.range > 0.0 and global_position.distance_to(unit.global_position) > ability.range:
+	if ability.ability_range > 0.0 and global_position.distance_to(unit.global_position) > ability.ability_range:
 		return
 	start_dismember_channel(unit, ability)
 
@@ -527,7 +585,7 @@ func start_dismember_channel(target: Unit, ability: AbilityDefinition) -> void:
 	attack_move_queued = false
 	channeling = true
 	channel_target = target
-	channel_range = max(ability.range, attack_range)
+	channel_range = max(ability.ability_range, attack_range)
 	channel_timer = max(0.1, ability.duration)
 	if channel_timer <= 0.1 and ability.stun_duration > 0.0:
 		channel_timer = max(0.1, ability.stun_duration)
@@ -649,6 +707,39 @@ func get_main_attribute_label() -> String:
 	if main_attribute == &"intelligence":
 		return "INT"
 	return String(main_attribute)
+
+func take_damage(amount: float, source: Node) -> void:
+	if is_dead:
+		return
+	# Воспроизводим анимацию получения урона, если она есть
+	if anim_hit != StringName() and not channeling:
+		play_action_animation(anim_hit)
+	super.take_damage(amount, source)
+
+func die() -> void:
+	if is_dead:
+		return
+	is_dead = true
+	# Воспроизводим анимацию смерти
+	if anim_death != StringName() and anim_player != null and is_instance_valid(anim_player):
+		play_animation(anim_death)
+		# Ждем завершения анимации смерти перед удалением
+		var death_length := get_animation_length(anim_death)
+		if death_length > 0.0:
+			# Используем таймер вместо await для избежания проблем
+			var timer := get_tree().create_timer(death_length)
+			timer.timeout.connect(_finalize_death, CONNECT_ONE_SHOT)
+			return
+	# Если анимации нет или длина 0, удаляем сразу
+	_finalize_death()
+
+func _finalize_death() -> void:
+	if not is_instance_valid(self):
+		return
+	emit_signal("died", self)
+	if last_damager != null and is_instance_valid(last_damager) and last_damager.has_method("on_kill"):
+		last_damager.on_kill(self)
+	queue_free()
 
 func do_attack() -> void:
 	play_action_animation(anim_attack)

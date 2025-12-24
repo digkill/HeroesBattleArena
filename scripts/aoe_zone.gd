@@ -12,23 +12,25 @@ var tick_timer := 0.0
 var source_unit: Unit
 
 func _ready() -> void:
-    tick_timer = tick_interval
+	tick_timer = tick_interval
 
 func _physics_process(delta: float) -> void:
-    duration -= delta
-    if duration <= 0.0:
-        queue_free()
-        return
+	duration -= delta
+	if duration <= 0.0:
+		queue_free()
+		return
 
-    tick_timer -= delta
-    if tick_timer <= 0.0:
-        tick_timer = tick_interval
-        apply_tick()
+	tick_timer -= delta
+	if tick_timer <= 0.0:
+		tick_timer = tick_interval
+		apply_tick()
 
 func apply_tick() -> void:
-    var bodies := get_overlapping_bodies()
-    for body in bodies:
-        if body is Unit and body.team != team:
-            var source: Node = source_unit if source_unit != null else self
-            body.take_damage(damage_per_tick, source)
-            body.apply_slow(slow_multiplier, slow_duration)
+	var bodies := get_overlapping_bodies()
+	for body in bodies:
+		if body is Unit and body.team != team:
+			var source: Node = self
+			if source_unit != null:
+				source = source_unit
+			body.take_damage(damage_per_tick, source)
+			body.apply_slow(slow_multiplier, slow_duration)

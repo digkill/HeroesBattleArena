@@ -31,7 +31,7 @@ static func _key_from_string(key_name: String) -> InputEventKey:
 	event.keycode = OS.find_keycode_from_string(key_name)
 	return event
 
-static func _mouse_button(button: int) -> InputEventMouseButton:
+static func _mouse_button(button: MouseButton) -> InputEventMouseButton:
 	var event := InputEventMouseButton.new()
 	event.button_index = button
 	return event

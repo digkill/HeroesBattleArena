@@ -1,104 +1,116 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://dsq81wllx576m"]
 
-[ext_resource type="Script" path="res://scripts/hero_select.gd" id="1_0t1d2"]
+[ext_resource type="Script" uid="uid://d2ioe8isu7138" path="res://scripts/hero_select.gd" id="1_0t1d2"]
 
 [node name="HeroSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_0t1d2")
 
 [node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.08, 0.08, 0.1, 1)
 
 [node name="Panel" type="Panel" parent="."]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -360
-offset_top = -240
-offset_right = 360
-offset_bottom = 240
+offset_left = -360.0
+offset_top = -240.0
+offset_right = 360.0
+offset_bottom = 240.0
 
 [node name="Title" type="Label" parent="Panel"]
-anchor_left = 0.0
+layout_mode = 0
 anchor_right = 1.0
-offset_top = 16
-offset_bottom = 48
-horizontal_alignment = 1
+offset_top = 16.0
+offset_bottom = 48.0
 text = "Hero Selection"
+horizontal_alignment = 1
 
 [node name="HeroCards" type="HBoxContainer" parent="Panel"]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300
-offset_top = -90
-offset_right = 300
-offset_bottom = 10
+offset_left = -300.0
+offset_top = -90.0
+offset_right = 300.0
+offset_bottom = 10.0
 
 [node name="RakshasaButton" type="Button" parent="Panel/HeroCards"]
 custom_minimum_size = Vector2(260, 64)
+layout_mode = 2
 text = "Rakshasa"
 
 [node name="ButcherButton" type="Button" parent="Panel/HeroCards"]
 custom_minimum_size = Vector2(260, 64)
+layout_mode = 2
 text = "Butcher of the Damned"
 
 [node name="HeroNote" type="Label" parent="Panel"]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200
-offset_top = 70
-offset_right = 200
-offset_bottom = 110
-horizontal_alignment = 1
+offset_left = -200.0
+offset_top = 70.0
+offset_right = 200.0
+offset_bottom = 110.0
 text = "Main attribute: Agility | Ultimate: Summon Pack"
+horizontal_alignment = 1
 
 [node name="SelectionLabel" type="Label" parent="Panel"]
-anchor_left = 0.0
+layout_mode = 0
 anchor_right = 1.0
-offset_top = 140
-offset_bottom = 170
-horizontal_alignment = 1
+offset_top = 140.0
+offset_bottom = 170.0
 text = "Selected: Rakshasa"
+horizontal_alignment = 1
 
 [node name="SideLabel" type="Label" parent="Panel"]
-anchor_left = 0.0
+layout_mode = 0
 anchor_right = 1.0
-offset_top = 176
-offset_bottom = 200
-horizontal_alignment = 1
+offset_top = 176.0
+offset_bottom = 200.0
 text = "Side: Sunrise"
+horizontal_alignment = 1
 
 [node name="SideButtons" type="HBoxContainer" parent="Panel"]
+layout_mode = 0
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -200
-offset_right = 200
-offset_top = 206
-offset_bottom = 246
+offset_left = -200.0
+offset_top = 206.0
+offset_right = 200.0
+offset_bottom = 246.0
 
 [node name="SunriseButton" type="Button" parent="Panel/SideButtons"]
 custom_minimum_size = Vector2(180, 36)
+layout_mode = 2
 text = "Sunrise (Light)"
 
 [node name="SunsetButton" type="Button" parent="Panel/SideButtons"]
 custom_minimum_size = Vector2(180, 36)
+layout_mode = 2
 text = "Sunset (Dark)"
 
 [node name="StartButton" type="Button" parent="Panel"]
+layout_mode = 0
 anchor_left = 0.5
-anchor_right = 0.5
 anchor_top = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -120
-offset_right = 120
-offset_top = -72
-offset_bottom = -28
+offset_left = -120.0
+offset_top = -72.0
+offset_right = 120.0
+offset_bottom = -28.0
 text = "Start Match"

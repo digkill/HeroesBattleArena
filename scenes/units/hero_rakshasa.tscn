@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://b8mnvinrf1tiv"]
 
 [ext_resource type="Script" uid="uid://7loycu4i5a47" path="res://scripts/hero.gd" id="1_8v7k0"]
-[ext_resource type="PackedScene" uid="uid://crume5kfximta" path="res://assets/models/heroes/Rakshasa/Rakshasa.glb" id="2_2g4if"]
-[ext_resource type="HeroDefinition" path="res://data/heroes/rakshasa.tres" id="3_1i7s8"]
+[ext_resource type="PackedScene" path="res://assets/models/Rakshasa/Rakshasa.glb" id="2_2g4if"]
+[ext_resource type="Resource" path="res://data/heroes/rakshasa.tres" id="3_1i7s8"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
 height = 1.6

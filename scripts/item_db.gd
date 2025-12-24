@@ -40,7 +40,7 @@ const SHOP_ITEMS: Array[String] = [
 	"agile_amulet",
 	"bladed_edge",
 	"shadow_talisman",
-    "healing_salve"
+	"healing_salve"
 ]
 
 static func get_item(item_id: String) -> Dictionary:

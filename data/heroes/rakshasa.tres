@@ -1,7 +1,7 @@
-[gd_resource type="HeroDefinition" load_steps=6 format=3]
+[gd_resource type="Resource" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/hero_definition.gd" id="1_5v2ah"]
-[ext_resource type="PackedScene" path="res://assets/models/heroes/Rakshasa/Rakshasa.glb" id="2_6y2k9"]
+[ext_resource type="PackedScene" path="res://assets/models/Rakshasa/Rakshasa.glb" id="2_6y2k9"]
 [ext_resource type="Resource" path="res://data/abilities/shadow_slash.tres" id="3_3sv43"]
 [ext_resource type="Resource" path="res://data/abilities/smoke_bomb.tres" id="4_r4m1c"]
 [ext_resource type="Resource" path="res://data/abilities/razor_shuriken.tres" id="5_a8q1d"]

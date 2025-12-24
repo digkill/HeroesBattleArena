@@ -23,12 +23,14 @@ func spawn_player_hero() -> void:
 
 	var hero := hero_scene.instantiate()
 	var side := get_selected_side()
+	var spawn_pos := Vector3.ZERO
+	hero.team = 1
 	if side == "Sunset" and sunset_spawn_hero != null:
-		hero.global_position = sunset_spawn_hero.global_position
+		spawn_pos = sunset_spawn_hero.position
 		hero.team = 2
 	elif sunrise_spawn_hero != null:
-		hero.global_position = sunrise_spawn_hero.global_position
-		hero.team = 1
+		spawn_pos = sunrise_spawn_hero.position
+	hero.position = spawn_pos
 	add_child(hero)
 
 	if camera_rig != null:

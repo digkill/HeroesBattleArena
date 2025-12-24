@@ -1,4 +1,4 @@
-[gd_resource type="HeroDefinition" load_steps=6 format=3]
+[gd_resource type="Resource" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/hero_definition.gd" id="1_butcher"]
 [ext_resource type="PackedScene" path="res://assets/models/Butcher of the Damned/Butcher of the Damned.glb" id="2_butcher"]
@@ -27,21 +27,21 @@ base_attack_damage = 30.0
 base_attack_cooldown = 1.7
 base_move_speed = 5.4
 abilities = [ExtResource("3_hook"), ExtResource("4_rot"), ExtResource("5_flesh"), ExtResource("6_dismember")]
-anim_idle = &"Idle"
-anim_move = &"Run"
-anim_attack = &"Attack"
-anim_cast = &"Cast"
-anim_death = &"Death"
-anim_hit = &"Hit"
-anim_jump = &"Jump"
-anim_skill1 = &"Skill1"
-anim_skill2 = &"Skill2"
-anim_skill3 = &"Skill3"
-anim_skill4 = &"Skill4"
-anim_ultimate = &"Ultimate"
-anim_teleportation = &"Teleportation"
-anim_stun = &"Stun"
-anim_won = &"Won"
-anim_fall = &"Fall"
-anim_loss = &"Loss"
-anim_use_item = &"UseItem"
+anim_idle = &"Armature|Idle"
+anim_move = &"Armature|Walking"
+anim_attack = &"Armature|Right_Hand_Sword_Slash"
+anim_cast = &"Armature|Right_Hand_Sword_Slash"
+anim_death = &"Armature|Dead"
+anim_hit = &"Armature|Stand_Dodge"
+anim_jump = &"Armature|Basic_Jump"
+anim_skill1 = &"Armature|Skill_01"
+anim_skill2 = &"Armature|Weapon_Combo"
+anim_skill3 = &"Armature|Skill_03"
+anim_skill4 = &"Armature|Weapon_Combo_2"
+anim_ultimate = &"Armature|Zombie_Scream"
+anim_teleportation = &"Armature|Stand_Dodge"
+anim_stun = &"Armature|Stand_Dodge"
+anim_won = &"Armature|Victory_Cheer"
+anim_fall = &"Armature|Fall3"
+anim_loss = &"Armature|Dead"
+anim_use_item = &"Armature|Right_Hand_Sword_Slash"

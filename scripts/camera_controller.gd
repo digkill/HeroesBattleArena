@@ -100,12 +100,12 @@ func setup_spring_arm_collision() -> void:
 	var has_mask := false
 	var has_margin := false
 	for prop in spring_arm.get_property_list():
-		var name: String = str(prop.get("name", ""))
-		if name == "shape":
+		var prop_name: String = str(prop.get("name", ""))
+		if prop_name == "shape":
 			has_shape = true
-		elif name == "collision_mask":
+		elif prop_name == "collision_mask":
 			has_mask = true
-		elif name == "margin":
+		elif prop_name == "margin":
 			has_margin = true
 	if has_mask:
 		spring_arm.collision_mask = camera_collision_mask if spring_collision_enabled else 0

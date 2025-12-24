@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/hero.gd" id="1_8v7k0"]
 [ext_resource type="PackedScene" path="res://assets/models/Butcher of the Damned/Butcher of the Damned.glb" id="2_butcher"]
-[ext_resource type="HeroDefinition" path="res://data/heroes/butcher.tres" id="3_butcher"]
+[ext_resource type="Resource" path="res://data/heroes/butcher.tres" id="3_butcher"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
 height = 2.0

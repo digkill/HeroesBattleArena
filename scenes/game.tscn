@@ -13,8 +13,8 @@
 [ext_resource type="Script" uid="uid://c2fvry2iufth" path="res://scripts/navigation_baker.gd" id="9_navbake"]
 
 [sub_resource type="NavigationMesh" id="6"]
-cell_size = 0.4
-cell_height = 0.2
+cell_size = 0.5
+cell_height = 0.25
 agent_height = 2.0
 agent_radius = 0.6
 agent_max_climb = 0.5
