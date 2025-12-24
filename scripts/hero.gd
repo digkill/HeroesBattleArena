@@ -28,6 +28,8 @@ var bonus_intelligence := 0.0
 var bonus_move_speed := 0.0
 var bonus_attack_damage := 0.0
 var bonus_attack_speed := 0.0
+var flesh_heap_stacks: int = 0
+var flesh_heap_bonus_strength: float = 0.0
 
 var level := 1
 var xp := 0
@@ -44,6 +46,15 @@ var attack_move_queued := false
 var projectile_scene: PackedScene = preload("res://scenes/units/projectile.tscn")
 var summon_scene: PackedScene = preload("res://scenes/units/summon.tscn")
 var aoe_scene: PackedScene = preload("res://scenes/effects/aoe_zone.tscn")
+var hook_projectile_scene: PackedScene = preload("res://scenes/effects/hook_projectile.tscn")
+
+var channeling := false
+var channel_timer := 0.0
+var channel_tick_timer := 0.0
+var channel_tick_interval := 0.5
+var channel_damage_per_tick := 0.0
+var channel_range := 0.0
+var channel_target: Unit
 
 var anim_idle: StringName = &""
 var anim_move: StringName = &""
@@ -100,6 +111,8 @@ func apply_hero_definition() -> void:
 	ability_timers.clear()
 	for _i in range(ability_defs.size()):
 		ability_timers.append(0.0)
+	flesh_heap_stacks = 0
+	flesh_heap_bonus_strength = 0.0
 
 	anim_idle = hero_def.anim_idle
 	anim_move = hero_def.anim_move
@@ -163,6 +176,17 @@ func _process(delta: float) -> void:
 	for i in range(ability_timers.size()):
 		ability_timers[i] = max(0.0, ability_timers[i] - delta)
 
+	update_channeling(delta)
+	if channeling:
+		if Input.is_action_just_pressed("stop_command"):
+			stop_actions()
+		elif Input.is_action_just_pressed("attack_command"):
+			queue_attack_command()
+		elif Input.is_action_just_pressed("hold_position"):
+			cancel_channel()
+			set_hold_position(true)
+		return
+
 	if Input.is_action_just_pressed("ability_1"):
 		cast_ability(0)
 	if Input.is_action_just_pressed("ability_2"):
@@ -180,12 +204,11 @@ func _process(delta: float) -> void:
 		use_item(2)
 
 	if Input.is_action_just_pressed("attack_command"):
-		attack_move_queued = true
+		queue_attack_command()
 	if Input.is_action_just_pressed("hold_position"):
 		set_hold_position(true)
 	if Input.is_action_just_pressed("stop_command"):
-		stop()
-		attack_move_queued = false
+		stop_actions()
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
@@ -194,6 +217,11 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if get_viewport().gui_get_hovered_control() != null:
 		return
+	if channeling:
+		if event is InputEventMouseButton and event.pressed:
+			cancel_channel()
+		elif event is InputEventScreenTouch and event.pressed:
+			cancel_channel()
 	if event is InputEventMouseMotion:
 		last_mouse_pos = event.position
 	elif event is InputEventMouseButton and event.pressed:
@@ -208,8 +236,17 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:
 				issue_move_or_attack(event.position)
 			attack_move_queued = false
+	elif event is InputEventScreenTouch and event.pressed:
+		last_mouse_pos = event.position
+		if attack_move_queued:
+			issue_attack_move(event.position)
+		else:
+			issue_move_or_attack(event.position)
+		attack_move_queued = false
 
 func issue_move_or_attack(screen_pos: Vector2) -> void:
+	if channeling:
+		cancel_channel()
 	var hit: Dictionary = get_mouse_hit(screen_pos)
 	if hit.is_empty():
 		return
@@ -224,6 +261,8 @@ func issue_move_or_attack(screen_pos: Vector2) -> void:
 		set_move_target(target_pos)
 
 func issue_attack_move(screen_pos: Vector2) -> void:
+	if channeling:
+		cancel_channel()
 	var hit: Dictionary = get_mouse_hit(screen_pos)
 	if hit.is_empty():
 		return
@@ -237,11 +276,26 @@ func issue_attack_move(screen_pos: Vector2) -> void:
 		set_attack_move_target(target_pos)
 
 func issue_move_to_world(target_pos: Vector3) -> void:
+	if channeling:
+		cancel_channel()
 	attack_target = null
 	set_move_target(target_pos)
 
+func queue_attack_command() -> void:
+	if channeling:
+		cancel_channel()
+	attack_move_queued = true
+
+func stop_actions() -> void:
+	if channeling:
+		cancel_channel()
+	stop()
+	attack_move_queued = false
+
 func update_animation_state(delta: float) -> void:
 	if is_dead:
+		return
+	if channeling:
 		return
 	if action_anim_timer > 0.0:
 		action_anim_timer = max(0.0, action_anim_timer - delta)
@@ -312,6 +366,8 @@ func get_ability_fallback_anim(index: int) -> StringName:
 	return StringName()
 
 func cast_ability(index: int) -> void:
+	if channeling:
+		return
 	var ability: AbilityDefinition = get_ability_def(index)
 	if ability == null:
 		return
@@ -344,6 +400,14 @@ func cast_ability(index: int) -> void:
 			ability_razor_shuriken(target_pos, ability)
 		&"pack_call":
 			ability_pack_call()
+		&"meat_hook":
+			ability_meat_hook(target_pos, ability)
+		&"rot":
+			ability_rot(ability)
+		&"flesh_heap":
+			ability_flesh_heap()
+		&"dismember":
+			ability_dismember(ability)
 
 func ability_shadow_slash(target_pos: Vector3, ability: AbilityDefinition) -> void:
 	var range: float = ability.range
@@ -399,10 +463,160 @@ func ability_pack_call() -> void:
 		summon.global_position = global_position + offset
 		get_parent().add_child(summon)
 
+func ability_meat_hook(target_pos: Vector3, ability: AbilityDefinition) -> void:
+	var range: float = ability.range
+	var direction: Vector3 = target_pos - global_position
+	direction.y = 0.0
+	if direction.length() < 0.1:
+		direction = -transform.basis.z
+	var origin: Vector3 = global_position + Vector3.UP * 1.2
+	var to: Vector3 = origin + direction.normalized() * range
+	var query := PhysicsRayQueryParameters3D.create(origin, to)
+	query.exclude = [self]
+	query.collision_mask = 3
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var hit_pos: Vector3 = to
+	var hooked_unit: Unit
+	if not hit.is_empty():
+		hit_pos = hit.get("position", to)
+		var unit: Unit = hit.get("collider", null) as Unit
+		if unit != null and is_enemy(unit) and not (unit is Building):
+			hooked_unit = unit
+			unit.take_damage(ability.damage, self)
+			pull_unit_to(unit, ability)
+	spawn_hook_visual(origin, hit_pos, hooked_unit, ability)
+
+func ability_rot(ability: AbilityDefinition) -> void:
+	var aoe: AoEZone = aoe_scene.instantiate() as AoEZone
+	if aoe == null:
+		return
+	aoe.team = team
+	aoe.damage_per_tick = ability.damage
+	aoe.source_unit = self
+	if ability.duration > 0.0:
+		aoe.duration = ability.duration
+	if ability.tick_interval > 0.0:
+		aoe.tick_interval = ability.tick_interval
+	if ability.radius > 0.0:
+		var scale_factor: float = ability.radius / 4.0
+		aoe.scale = Vector3.ONE * scale_factor
+	add_child(aoe)
+	aoe.position = Vector3.ZERO
+
+func ability_flesh_heap() -> void:
+	return
+
+func ability_dismember(ability: AbilityDefinition) -> void:
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var hit: Dictionary = get_mouse_hit(mouse_pos)
+	if hit.is_empty():
+		return
+	var unit: Unit = hit.get("collider", null) as Unit
+	if unit == null or not is_enemy(unit):
+		return
+	if unit is Building:
+		return
+	if ability.range > 0.0 and global_position.distance_to(unit.global_position) > ability.range:
+		return
+	start_dismember_channel(unit, ability)
+
+func start_dismember_channel(target: Unit, ability: AbilityDefinition) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	stop()
+	attack_move_queued = false
+	channeling = true
+	channel_target = target
+	channel_range = max(ability.range, attack_range)
+	channel_timer = max(0.1, ability.duration)
+	if channel_timer <= 0.1 and ability.stun_duration > 0.0:
+		channel_timer = max(0.1, ability.stun_duration)
+	channel_tick_interval = ability.tick_interval if ability.tick_interval > 0.0 else 0.5
+	channel_tick_timer = 0.0
+	var ticks: int = max(1, int(ceil(channel_timer / channel_tick_interval)))
+	channel_damage_per_tick = ability.damage / float(ticks) if ability.damage > 0.0 else 0.0
+	apply_stun(channel_timer)
+	target.apply_stun(max(channel_timer, ability.stun_duration))
+	face_point(target.global_position)
+	if anim_ultimate != StringName():
+		action_anim_timer = max(action_anim_timer, channel_timer)
+		play_animation(anim_ultimate)
+
+func update_channeling(delta: float) -> void:
+	if not channeling:
+		return
+	if channel_target == null or not is_instance_valid(channel_target) or channel_target.is_dead:
+		cancel_channel()
+		return
+	if channel_target.global_position.distance_to(global_position) > channel_range + 0.5:
+		cancel_channel()
+		return
+	channel_timer -= delta
+	channel_tick_timer -= delta
+	if channel_tick_timer <= 0.0:
+		channel_tick_timer = channel_tick_interval
+		if channel_damage_per_tick > 0.0:
+			channel_target.take_damage(channel_damage_per_tick, self)
+	face_point(channel_target.global_position)
+	if channel_timer <= 0.0:
+		cancel_channel()
+
+func cancel_channel() -> void:
+	if not channeling:
+		return
+	if channel_target != null and is_instance_valid(channel_target):
+		channel_target.stun_timer = 0.0
+	channeling = false
+	channel_target = null
+	channel_timer = 0.0
+	channel_tick_timer = 0.0
+	channel_damage_per_tick = 0.0
+	channel_range = 0.0
+	if stun_timer > 0.0:
+		stun_timer = 0.0
+
+func pull_unit_to(unit: Unit, ability: AbilityDefinition) -> void:
+	if unit == null or not is_instance_valid(unit):
+		return
+	var pull_duration: float = max(0.05, ability.pull_duration)
+	var pull_offset: float = ability.pull_offset
+	var direction: Vector3 = unit.global_position - global_position
+	direction.y = 0.0
+	if direction.length() < 0.1:
+		direction = -transform.basis.z
+	var target_pos: Vector3 = global_position + direction.normalized() * pull_offset
+	unit.stop()
+	unit.apply_stun(pull_duration)
+	var tween := get_tree().create_tween()
+	tween.tween_property(unit, "global_position", target_pos, pull_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+func spawn_hook_visual(origin: Vector3, hit_pos: Vector3, hooked_unit: Unit, ability: AbilityDefinition) -> void:
+	if hook_projectile_scene == null:
+		return
+	var hook: HookProjectile = hook_projectile_scene.instantiate() as HookProjectile
+	if hook == null:
+		return
+	hook.caster = self
+	hook.global_position = origin
+	hook.target_position = hit_pos
+	hook.hooked_unit = hooked_unit
+	var height := origin.y - global_position.y
+	if height > 0.0:
+		hook.hook_height = height
+	if ability.pull_offset > 0.0:
+		hook.finish_distance = ability.pull_offset + 0.2
+	get_parent().add_child(hook)
+
 func get_ability_def(index: int) -> AbilityDefinition:
 	if index < 0 or index >= ability_defs.size():
 		return null
 	return ability_defs[index]
+
+func get_ability_def_by_id(id: StringName) -> AbilityDefinition:
+	for ability in ability_defs:
+		if ability != null and ability.ability_id == id:
+			return ability
+	return null
 
 func get_ability_cooldown(index: int) -> float:
 	if index < 0 or index >= ability_timers.size():
@@ -441,7 +655,7 @@ func do_attack() -> void:
 	super.do_attack()
 
 func recalculate_stats() -> void:
-	strength = base_strength + bonus_strength
+	strength = base_strength + bonus_strength + flesh_heap_bonus_strength
 	agility = base_agility + bonus_agility
 	intelligence = base_intelligence + bonus_intelligence
 
@@ -510,6 +724,12 @@ func on_kill(victim: Unit) -> void:
 	xp += victim.xp_bounty
 	gold_changed.emit(gold)
 	xp_changed.emit(xp, xp_to_next)
+
+	var flesh_heap: AbilityDefinition = get_ability_def_by_id(&"flesh_heap")
+	if flesh_heap != null and flesh_heap.stack_bonus > 0.0:
+		flesh_heap_stacks += 1
+		flesh_heap_bonus_strength += flesh_heap.stack_bonus
+		recalculate_stats()
 
 	while xp >= xp_to_next:
 		level_up()

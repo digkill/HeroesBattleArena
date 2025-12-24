@@ -35,6 +35,7 @@ var last_damager: Node
 var is_dead := false
 var slow_multiplier := 1.0
 var slow_timer := 0.0
+var stun_timer := 0.0
 var nav_agent: NavigationAgent3D
 var nav_target := Vector3.ZERO
 var nav_has_target := false
@@ -116,6 +117,11 @@ func apply_slow(multiplier: float, duration: float) -> void:
     slow_multiplier = min(slow_multiplier, multiplier)
     slow_timer = max(slow_timer, duration)
 
+func apply_stun(duration: float) -> void:
+    if duration <= 0.0:
+        return
+    stun_timer = max(stun_timer, duration)
+
 func die() -> void:
     if is_dead:
         return
@@ -142,6 +148,12 @@ func _physics_process(delta: float) -> void:
     if nav_agent != null:
         nav_agent.max_speed = move_speed
 
+    if stun_timer > 0.0:
+        stun_timer = max(0.0, stun_timer - delta)
+        velocity = Vector3.ZERO
+        move_and_slide()
+        return
+
     if attack_target == null and (attack_move_active or hold_position):
         var search_range: float = aggro_range if attack_move_active else attack_range
         var enemy: Unit = find_nearest_enemy_in_range(search_range)
@@ -161,6 +173,7 @@ func _physics_process(delta: float) -> void:
                 attack_target = null
                 velocity = Vector3.ZERO
             else:
+                set_nav_target(attack_target.global_position)
                 move_towards(attack_target.global_position)
     elif has_move_target:
         var distance_to_goal := global_position.distance_to(move_target)
@@ -179,9 +192,7 @@ func _physics_process(delta: float) -> void:
 
 func move_towards(point: Vector3) -> void:
     var target_point := point
-    if navigation_enabled and nav_agent != null:
-        if not nav_has_target or nav_target.distance_to(point) > 0.5:
-            set_nav_target(point)
+    if should_use_nav(point):
         target_point = nav_agent.get_next_path_position()
     var direction := (target_point - global_position)
     direction.y = 0.0
@@ -196,6 +207,15 @@ func move_towards(point: Vector3) -> void:
             direction = direction.normalized()
             velocity = direction * move_speed * slow_multiplier
             look_at(global_position + direction, Vector3.UP)
+
+func should_use_nav(point: Vector3) -> bool:
+    if not navigation_enabled or nav_agent == null:
+        return false
+    if not nav_has_target or nav_target.distance_to(point) > 0.5:
+        set_nav_target(point)
+    if nav_agent.is_navigation_finished():
+        return false
+    return true
 
 func face_point(point: Vector3) -> void:
     var direction := point - global_position

@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/building.gd" id="1_1bui1"]
+
+[sub_resource type="BoxShape3D" id="1"]
+size = Vector3(3, 4, 3)
+
+[sub_resource type="BoxMesh" id="2"]
+size = Vector3(3, 4, 3)
+
+[node name="BuildingBase" type="CharacterBody3D"]
+script = ExtResource("1_1bui1")
+collision_layer = 2
+collision_mask = 3
+navigation_enabled = false
+move_speed = 0.0
+can_attack = false
+max_health = 1200.0
+attack_range = 8.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("2")

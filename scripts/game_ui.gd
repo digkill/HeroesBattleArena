@@ -24,6 +24,8 @@ class_name GameUI
     $HUD/Items/Item2,
     $HUD/Items/Item3
 ]
+@onready var attack_button: Button = $HUD/Commands/AttackButton
+@onready var stop_button: Button = $HUD/Commands/StopButton
 @onready var shop_panel: Panel = $ShopPanel
 @onready var shop_list: VBoxContainer = $ShopPanel/Scroll/ShopList
 @onready var minimap: Minimap = $Minimap
@@ -40,6 +42,11 @@ func _ready() -> void:
 
     for i in range(item_buttons.size()):
         item_buttons[i].pressed.connect(_on_item_pressed.bind(i))
+
+    if attack_button != null:
+        attack_button.pressed.connect(_on_attack_pressed)
+    if stop_button != null:
+        stop_button.pressed.connect(_on_stop_pressed)
 
     build_shop()
 
@@ -142,6 +149,16 @@ func _on_item_pressed(index: int) -> void:
     if hero == null:
         return
     hero.use_item(index)
+
+func _on_attack_pressed() -> void:
+    if hero == null:
+        return
+    hero.queue_attack_command()
+
+func _on_stop_pressed() -> void:
+    if hero == null:
+        return
+    hero.stop_actions()
 
 func _on_gold_changed(value: int) -> void:
     gold_label.text = "Gold: %d" % value

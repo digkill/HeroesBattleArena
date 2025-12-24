@@ -1,0 +1,16 @@
+[gd_resource type="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ability_definition.gd" id="1_meat"]
+
+[resource]
+script = ExtResource("1_meat")
+ability_id = &"meat_hook"
+display_name = "Meat Hook"
+hotkey_label = "Q"
+mana_cost = 110.0
+cooldown = 14.0
+range = 22.0
+damage = 120.0
+pull_duration = 0.35
+pull_offset = 1.6
+description = "Launch a hook that pulls the first enemy hit."

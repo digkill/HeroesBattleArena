@@ -1,0 +1,17 @@
+[gd_resource type="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ability_definition.gd" id="1_dismember"]
+
+[resource]
+script = ExtResource("1_dismember")
+ability_id = &"dismember"
+display_name = "Dismember"
+hotkey_label = "R"
+mana_cost = 120.0
+cooldown = 18.0
+range = 2.2
+damage = 160.0
+duration = 3.0
+tick_interval = 0.5
+stun_duration = 3.0
+description = "Bite the target, stunning and damaging them."

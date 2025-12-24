@@ -8,7 +8,7 @@
 height = 1.6
 
 [node name="RakshasaHero" type="CharacterBody3D"]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
 collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_8v7k0")

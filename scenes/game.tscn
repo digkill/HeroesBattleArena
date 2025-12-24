@@ -1,14 +1,23 @@
-[gd_scene load_steps=15 format=3 uid="uid://d372p60xoe4x6"]
+[gd_scene load_steps=18 format=3 uid="uid://d372p60xoe4x6"]
 
 [ext_resource type="Script" uid="uid://c8ox47aef8at7" path="res://scripts/game_manager.gd" id="1_q1p3a"]
 [ext_resource type="PackedScene" uid="uid://b8mnvinrf1tiv" path="res://scenes/units/hero_rakshasa.tscn" id="2_e5n1p"]
+[ext_resource type="PackedScene" path="res://scenes/units/hero_butcher.tscn" id="11_butcher"]
 [ext_resource type="PackedScene" uid="uid://curojm5wwrwlh" path="res://assets/models/maps/default_game_map.glb" id="3_2m2aq"]
+[ext_resource type="PackedScene" path="res://scenes/units/building_base.tscn" id="10_building"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_ui.tscn" id="4_3w9cx"]
 [ext_resource type="Script" uid="uid://dceec7gkd5yii" path="res://scripts/camera_controller.gd" id="5_9j0xv"]
 [ext_resource type="Script" uid="uid://c1dn8wmwaho72" path="res://scripts/creep_spawner.gd" id="6_d5p2q"]
 [ext_resource type="PackedScene" path="res://scenes/units/creep.tscn" id="7_8fsx4"]
-[ext_resource type="Script" path="res://scripts/map_collision.gd" id="8_mapcol"]
-[ext_resource type="Script" path="res://scripts/navigation_baker.gd" id="9_navbake"]
+[ext_resource type="Script" uid="uid://77c63ulednob" path="res://scripts/map_collision.gd" id="8_mapcol"]
+[ext_resource type="Script" uid="uid://c2fvry2iufth" path="res://scripts/navigation_baker.gd" id="9_navbake"]
+
+[sub_resource type="NavigationMesh" id="6"]
+cell_size = 0.4
+cell_height = 0.2
+agent_height = 2.0
+agent_radius = 0.6
+agent_max_climb = 0.5
 
 [sub_resource type="BoxShape3D" id="1"]
 size = Vector3(220, 2, 220)
@@ -25,23 +34,14 @@ albedo_color = Color(0.85, 0.2, 0.2, 1)
 [sub_resource type="StandardMaterial3D" id="5"]
 albedo_color = Color(0.8, 0.75, 0.2, 1)
 
-[sub_resource type="NavigationMesh" id="6"]
-cell_size = 0.4
-cell_height = 0.2
-agent_height = 2.0
-agent_radius = 0.6
-agent_max_climb = 0.5
-agent_max_slope = 45.0
-
 [node name="Game" type="Node3D"]
 script = ExtResource("1_q1p3a")
 rakshasa_scene = ExtResource("2_e5n1p")
+butcher_scene = ExtResource("11_butcher")
 
 [node name="Map" parent="." instance=ExtResource("3_2m2aq")]
 transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0)
 script = ExtResource("8_mapcol")
-collision_layer = 1
-collision_mask = 1
 
 [node name="NavigationRegion" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("6")
@@ -57,10 +57,10 @@ shape = SubResource("1")
 transform = Transform3D(1, 0, 0, 0, 0.57357645, 0.81915206, 0, -0.81915206, 0.57357645, 0, 0, 0)
 light_energy = 1.2
 
-[node name="HeroSpawnSunrise" type="Node3D" parent="."]
+[node name="SunriseSpawnHero" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, -70)
 
-[node name="HeroSpawnSunset" type="Node3D" parent="."]
+[node name="SunsetSpawnHero" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 0, 70)
 
 [node name="CameraRig" type="Node3D" parent="."]
@@ -92,7 +92,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 0, 70)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, -70)
 
 [node name="Point2" type="Node3D" parent="WaypointsAllyMid"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Point3" type="Node3D" parent="WaypointsAllyMid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 0, 70)
@@ -125,7 +124,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, -70)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 0, 70)
 
 [node name="Point2" type="Node3D" parent="WaypointsEnemyMid"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Point3" type="Node3D" parent="WaypointsEnemyMid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, -70)
@@ -172,7 +170,6 @@ waypoint_container = NodePath("../WaypointsAllyBot")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 0, 72)
 script = ExtResource("6_d5p2q")
 creep_scene = ExtResource("7_8fsx4")
-team = 2
 spawn_interval = 8.0
 max_alive = 4
 waypoint_container = NodePath("../WaypointsEnemyTop")
@@ -181,7 +178,6 @@ waypoint_container = NodePath("../WaypointsEnemyTop")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 0, 70)
 script = ExtResource("6_d5p2q")
 creep_scene = ExtResource("7_8fsx4")
-team = 2
 spawn_interval = 8.0
 max_alive = 4
 waypoint_container = NodePath("../WaypointsEnemyMid")
@@ -190,20 +186,19 @@ waypoint_container = NodePath("../WaypointsEnemyMid")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 0, 68)
 script = ExtResource("6_d5p2q")
 creep_scene = ExtResource("7_8fsx4")
-team = 2
 spawn_interval = 8.0
 max_alive = 4
 waypoint_container = NodePath("../WaypointsEnemyBot")
 
-[node name="AlliedBase" type="MeshInstance3D" parent="."]
+[node name="AlliedBase" parent="." instance=ExtResource("10_building")]
 transform = Transform3D(1, 0, 0, 0, 1.6, 0, 0, 0, 1, -30, 0, -30)
-material_override = SubResource("3")
-mesh = SubResource("2")
+team = 1
+can_attack = false
 
-[node name="EnemyBase" type="MeshInstance3D" parent="."]
+[node name="EnemyBase" parent="." instance=ExtResource("10_building")]
 transform = Transform3D(1, 0, 0, 0, 1.6, 0, 0, 0, 1, 30, 0, 30)
-material_override = SubResource("4")
-mesh = SubResource("2")
+team = 2
+can_attack = false
 
 [node name="Shop" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1.1, 0, 0, 0, 1, -28, 0, -18)

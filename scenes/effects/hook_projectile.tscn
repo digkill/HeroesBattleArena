@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/hook_projectile.gd" id="1_hook"]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="SphereMesh" id="2"]
+radius = 0.2
+
+[sub_resource type="StandardMaterial3D" id="3"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="4"]
+albedo_color = Color(0.6, 0.12, 0.12, 1)
+
+[node name="HookProjectile" type="Node3D"]
+script = ExtResource("1_hook")
+
+[node name="Chain" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+material_override = SubResource("3")
+
+[node name="HookHead" type="MeshInstance3D" parent="."]
+mesh = SubResource("2")
+material_override = SubResource("4")

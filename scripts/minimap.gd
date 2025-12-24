@@ -12,6 +12,8 @@ class_name Minimap
 @export var camera_rect_border: Color = Color(1, 1, 0.2, 0.8)
 @export var camera_rect_border_width: float = 1.0
 @export var ortho_height: float = 220.0
+@export var invert_x := false
+@export var invert_y := false
 
 @onready var viewport: SubViewport = $SubViewport
 @onready var minimap_texture: TextureRect = $Frame/TextureRect
@@ -199,8 +201,8 @@ func world_to_minimap(world_pos: Vector3) -> Vector2:
         return Vector2.ZERO
     var norm_x: float = (world_pos.x - world_min.x) / width
     var norm_y: float = (world_pos.z - world_min.z) / depth
-    var x: float = norm_x * size.x
-    var y: float = (1.0 - norm_y) * size.y
+    var x: float = (1.0 - norm_x) * size.x if invert_x else norm_x * size.x
+    var y: float = (1.0 - norm_y) * size.y if invert_y else norm_y * size.y
     return Vector2(x, y)
 
 func minimap_to_world(minimap_pos: Vector2) -> Vector3:
@@ -209,8 +211,12 @@ func minimap_to_world(minimap_pos: Vector2) -> Vector3:
         return Vector3.ZERO
     var norm_x: float = clamp(minimap_pos.x / size.x, 0.0, 1.0)
     var norm_y: float = clamp(minimap_pos.y / size.y, 0.0, 1.0)
+    if invert_x:
+        norm_x = 1.0 - norm_x
+    if invert_y:
+        norm_y = 1.0 - norm_y
     var world_x: float = lerp(world_min.x, world_max.x, norm_x)
-    var world_z: float = lerp(world_max.z, world_min.z, norm_y)
+    var world_z: float = lerp(world_min.z, world_max.z, norm_y)
     return Vector3(world_x, 0.0, world_z)
 
 func move_camera_to(world_pos: Vector3) -> void:

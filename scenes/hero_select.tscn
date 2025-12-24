@@ -30,16 +30,23 @@ offset_bottom = 48
 horizontal_alignment = 1
 text = "Hero Selection"
 
-[node name="HeroCard" type="Button" parent="Panel"]
+[node name="HeroCards" type="HBoxContainer" parent="Panel"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160
-offset_top = -80
-offset_right = 160
-offset_bottom = 60
+offset_left = -300
+offset_top = -90
+offset_right = 300
+offset_bottom = 10
+
+[node name="RakshasaButton" type="Button" parent="Panel/HeroCards"]
+custom_minimum_size = Vector2(260, 64)
 text = "Rakshasa"
+
+[node name="ButcherButton" type="Button" parent="Panel/HeroCards"]
+custom_minimum_size = Vector2(260, 64)
+text = "Butcher of the Damned"
 
 [node name="HeroNote" type="Label" parent="Panel"]
 anchor_left = 0.5

@@ -1,0 +1,16 @@
+[gd_resource type="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ability_definition.gd" id="1_rot"]
+
+[resource]
+script = ExtResource("1_rot")
+ability_id = &"rot"
+display_name = "Rot"
+hotkey_label = "W"
+mana_cost = 0.0
+cooldown = 10.0
+radius = 4.5
+damage = 12.0
+duration = 4.0
+tick_interval = 0.5
+description = "Emit a damaging aura around you."

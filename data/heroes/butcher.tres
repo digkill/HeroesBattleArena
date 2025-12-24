@@ -1,0 +1,47 @@
+[gd_resource type="HeroDefinition" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/hero_definition.gd" id="1_butcher"]
+[ext_resource type="PackedScene" path="res://assets/models/Butcher of the Damned/Butcher of the Damned.glb" id="2_butcher"]
+[ext_resource type="Resource" path="res://data/abilities/meat_hook.tres" id="3_hook"]
+[ext_resource type="Resource" path="res://data/abilities/rot.tres" id="4_rot"]
+[ext_resource type="Resource" path="res://data/abilities/flesh_heap.tres" id="5_flesh"]
+[ext_resource type="Resource" path="res://data/abilities/dismember.tres" id="6_dismember"]
+
+[resource]
+script = ExtResource("1_butcher")
+hero_id = &"butcher"
+display_name = "Butcher of the Damned"
+main_attribute = &"strength"
+model_scene = ExtResource("2_butcher")
+model_node_path = NodePath("ButcherModel")
+model_offset = Vector3(0, 0, 0)
+model_rotation_degrees = Vector3(0, 0, 0)
+model_scale = Vector3(1, 1, 1)
+base_strength = 24.0
+base_agility = 14.0
+base_intelligence = 16.0
+strength_gain = 3.0
+agility_gain = 1.4
+intelligence_gain = 1.8
+base_attack_damage = 30.0
+base_attack_cooldown = 1.7
+base_move_speed = 5.4
+abilities = [ExtResource("3_hook"), ExtResource("4_rot"), ExtResource("5_flesh"), ExtResource("6_dismember")]
+anim_idle = &"Idle"
+anim_move = &"Run"
+anim_attack = &"Attack"
+anim_cast = &"Cast"
+anim_death = &"Death"
+anim_hit = &"Hit"
+anim_jump = &"Jump"
+anim_skill1 = &"Skill1"
+anim_skill2 = &"Skill2"
+anim_skill3 = &"Skill3"
+anim_skill4 = &"Skill4"
+anim_ultimate = &"Ultimate"
+anim_teleportation = &"Teleportation"
+anim_stun = &"Stun"
+anim_won = &"Won"
+anim_fall = &"Fall"
+anim_loss = &"Loss"
+anim_use_item = &"UseItem"

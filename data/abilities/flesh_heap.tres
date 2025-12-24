@@ -1,0 +1,13 @@
+[gd_resource type="AbilityDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ability_definition.gd" id="1_flesh"]
+
+[resource]
+script = ExtResource("1_flesh")
+ability_id = &"flesh_heap"
+display_name = "Flesh Heap"
+hotkey_label = "E"
+mana_cost = 0.0
+cooldown = 0.0
+stack_bonus = 0.3
+description = "Passive: gain strength when you kill an enemy."
