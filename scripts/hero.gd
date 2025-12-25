@@ -90,6 +90,7 @@ func _ready() -> void:
 	xp_changed.emit(xp, xp_to_next)
 	level_changed.emit(level)
 	set_process(true)
+	set_process_input(true)
 	set_process_unhandled_input(true)
 
 func apply_hero_definition() -> void:
@@ -194,6 +195,18 @@ func _process(delta: float) -> void:
 			set_hold_position(true)
 		return
 
+	# Обрабатываем команду движения через InputMap action
+	if Input.is_action_just_pressed("move_command"):
+		var mouse_pos := get_viewport().get_mouse_position()
+		var hovered := get_viewport().gui_get_hovered_control()
+		# Проверяем, что клик не по GUI элементу
+		if hovered == null or not (hovered is BaseButton or hovered is LineEdit):
+			if attack_move_queued:
+				issue_attack_move(mouse_pos)
+			else:
+				issue_move_or_attack(mouse_pos)
+			attack_move_queued = false
+
 	if Input.is_action_just_pressed("ability_1"):
 		cast_ability(0)
 	if Input.is_action_just_pressed("ability_2"):
@@ -221,60 +234,120 @@ func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
 	update_animation_state(delta)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if get_viewport().gui_get_hovered_control() != null:
-		return
-	if channeling:
-		if event is InputEventMouseButton and event.pressed:
-			cancel_channel()
-		elif event is InputEventScreenTouch and event.pressed:
-			cancel_channel()
-	if event is InputEventMouseMotion:
-		last_mouse_pos = event.position
-	elif event is InputEventMouseButton and event.pressed:
-		last_mouse_pos = event.position
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if attack_move_queued:
-				issue_attack_move(event.position)
-				attack_move_queued = false
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
+func _input(event: InputEvent) -> void:
+	# Используем _input для более надежной обработки кликов мыши
+	# Проверяем, что клик не по GUI элементу
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
+			var hovered := get_viewport().gui_get_hovered_control()
+			if hovered != null:
+				# Пропускаем только если это действительно интерактивный элемент
+				if hovered is BaseButton or hovered is LineEdit:
+					return
+			
+			last_mouse_pos = event.position
 			if attack_move_queued:
 				issue_attack_move(event.position)
 			else:
 				issue_move_or_attack(event.position)
 			attack_move_queued = false
-	elif event is InputEventScreenTouch and event.pressed:
+		elif event.button_index == MOUSE_BUTTON_LEFT:
+			last_mouse_pos = event.position
+			if attack_move_queued:
+				issue_attack_move(event.position)
+				attack_move_queued = false
+	
+	if event is InputEventScreenTouch and event.pressed:
+		var hovered := get_viewport().gui_get_hovered_control()
+		if hovered != null:
+			if hovered is BaseButton or hovered is LineEdit:
+				return
 		last_mouse_pos = event.position
 		if attack_move_queued:
 			issue_attack_move(event.position)
 		else:
 			issue_move_or_attack(event.position)
 		attack_move_queued = false
+	
+	if channeling:
+		if event is InputEventMouseButton and event.pressed:
+			cancel_channel()
+		elif event is InputEventScreenTouch and event.pressed:
+			cancel_channel()
+	
+	if event is InputEventMouseMotion:
+		last_mouse_pos = event.position
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Дублируем обработку в _unhandled_input на случай, если _input не сработает
+	# (например, если событие было обработано GUI, но мы все равно хотим его обработать)
+	_input(event)
 
 func issue_move_or_attack(screen_pos: Vector2) -> void:
 	if channeling:
 		cancel_channel()
+	
 	var hit: Dictionary = get_mouse_hit(screen_pos)
+	var target_pos: Vector3
+	var collider: Object = null
+	
 	if hit.is_empty():
-		return
-	var collider: Object = hit.get("collider", null)
-	var target_pos: Vector3 = hit.get("position", global_position)
+		# Если raycast не нашел объект, пытаемся найти точку на плоскости земли
+		var camera := get_viewport().get_camera_3d()
+		if camera == null:
+			return
+		var from := camera.project_ray_origin(screen_pos)
+		var direction := camera.project_ray_normal(screen_pos)
+		# Вычисляем точку пересечения с плоскостью Y=0 (земля)
+		if abs(direction.y) > 0.001:
+			var t := -from.y / direction.y
+			if t > 0:
+				target_pos = from + direction * t
+			else:
+				return
+		else:
+			return
+	else:
+		collider = hit.get("collider", null)
+		target_pos = hit.get("position", global_position)
+	
 	var unit: Unit = collider as Unit
 	if unit != null and is_enemy(unit):
 		set_attack_target(unit)
 		has_move_target = false
 	else:
 		attack_target = null
+		print("Hero: Setting move target to: ", target_pos, " current pos: ", global_position)
 		set_move_target(target_pos)
+		print("Hero: has_move_target=", has_move_target, " move_target=", move_target)
 
 func issue_attack_move(screen_pos: Vector2) -> void:
 	if channeling:
 		cancel_channel()
 	var hit: Dictionary = get_mouse_hit(screen_pos)
+	var target_pos: Vector3
+	var collider: Object = null
+	
 	if hit.is_empty():
-		return
-	var collider: Object = hit.get("collider", null)
-	var target_pos: Vector3 = hit.get("position", global_position)
+		# Если raycast не нашел объект, пытаемся найти точку на плоскости земли
+		var camera := get_viewport().get_camera_3d()
+		if camera == null:
+			return
+		var from := camera.project_ray_origin(screen_pos)
+		var direction := camera.project_ray_normal(screen_pos)
+		# Вычисляем точку пересечения с плоскостью Y=0 (земля)
+		if abs(direction.y) > 0.001:
+			var t := -from.y / direction.y
+			if t > 0:
+				target_pos = from + direction * t
+			else:
+				return
+		else:
+			return
+	else:
+		collider = hit.get("collider", null)
+		target_pos = hit.get("position", global_position)
+	
 	var unit: Unit = collider as Unit
 	if unit != null and is_enemy(unit):
 		set_attack_target(unit)
@@ -308,17 +381,24 @@ func update_animation_state(delta: float) -> void:
 		action_anim_timer = max(0.0, action_anim_timer - delta)
 		if action_anim_timer > 0.0:
 			return
+	
 	# Определяем, какая анимация движения использовать
-	if velocity.length() > 0.1 or has_move_target:
+	# Проверяем, действительно ли герой двигается
+	# Используем только velocity, так как has_move_target может быть true даже когда герой стоит
+	var is_moving := velocity.length() > 0.1
+	
+	if is_moving:
 		var move_anim := anim_move
 		# Пытаемся использовать Running, если доступна
-		if anim_player != null:
+		if anim_player != null and is_instance_valid(anim_player):
 			var running_anim_name := String(anim_move).replace("Walking", "Running")
 			if anim_player.has_animation(running_anim_name):
 				move_anim = StringName(running_anim_name)
 		play_animation(move_anim)
 	else:
-		play_animation(anim_idle)
+		# Герой стоит - проигрываем idle анимацию
+		if anim_idle != StringName():
+			play_animation(anim_idle)
 
 func play_action_animation(anim_name: StringName) -> void:
 	if anim_name == StringName():
@@ -351,7 +431,9 @@ func play_animation(anim_name: StringName) -> void:
 			if anim_player.has_animation(prefixed_name):
 				anim_key = prefixed_name
 			else:
-				# Если и с префиксом не найдено, возвращаемся
+				# Если и с префиксом не найдено, выводим предупреждение для отладки
+				if anim_name == anim_idle:
+					push_warning("Hero: Idle animation not found: " + anim_key + " (tried: " + prefixed_name + ")")
 				return
 		else:
 			# Если уже есть префикс, но не найдено, пробуем без префикса
@@ -360,6 +442,9 @@ func play_animation(anim_name: StringName) -> void:
 				if anim_player.has_animation(unprefixed_name):
 					anim_key = unprefixed_name
 				else:
+					# Выводим предупреждение для отладки
+					if anim_name == anim_idle:
+						push_warning("Hero: Idle animation not found: " + anim_key + " (tried: " + unprefixed_name + ")")
 					return
 			else:
 				return

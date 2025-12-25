@@ -163,7 +163,9 @@ func _physics_process(delta: float) -> void:
 		if enemy != null:
 			attack_target = enemy
 
-	var has_valid_attack := attack_target != null and is_instance_valid(attack_target) and not attack_target.is_dead
+	var has_valid_attack := attack_target != null
+	has_valid_attack = has_valid_attack and is_instance_valid(attack_target)
+	has_valid_attack = has_valid_attack and not attack_target.is_dead
 	if has_valid_attack:
 		var distance := global_position.distance_to(attack_target.global_position)
 		if distance <= attack_range:
@@ -181,12 +183,14 @@ func _physics_process(delta: float) -> void:
 	elif has_move_target:
 		var distance_to_goal := global_position.distance_to(move_target)
 		if distance_to_goal <= nav_target_distance:
+			# Достигли цели - останавливаемся
 			has_move_target = false
 			if attack_move_active:
 				attack_move_active = false
 			nav_has_target = false
 			velocity = Vector3.ZERO
 		else:
+			# Двигаемся к цели
 			move_towards(move_target)
 	else:
 		velocity = Vector3.ZERO
@@ -194,48 +198,55 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func move_towards(point: Vector3) -> void:
-	# Всегда используем навигацию, если она доступна и включена
+	var distance_to_target := global_position.distance_to(point)
+	
+	# Если уже достигли цели, останавливаемся
+	if distance_to_target <= nav_target_distance:
+		velocity = Vector3.ZERO
+		return
+	
+	# Пробуем использовать навигацию, если она доступна и включена
 	if navigation_enabled and nav_agent != null:
 		# Обновляем цель навигации, если она изменилась
 		if not nav_has_target or nav_target.distance_to(point) > 0.5:
 			set_nav_target(point)
 		
-		# Ждем, пока навигация вычислит путь
-		if nav_agent.is_navigation_finished():
-			# Если путь закончен, но мы еще не достигли цели, пытаемся идти напрямую
-			var distance_to_target := global_position.distance_to(point)
-			if distance_to_target > nav_target_distance:
-				# Возможно, цель недоступна, но пытаемся приблизиться
-				var direction := (point - global_position)
-				direction.y = 0.0
-				if direction.length() > 0.001:
-					direction = direction.normalized()
-					velocity = direction * move_speed * slow_multiplier
-					look_at(global_position + direction, Vector3.UP)
-				return
-			else:
-				velocity = Vector3.ZERO
+		# Пытаемся получить следующую точку пути от навигации
+		# Проверяем, есть ли путь и не завершена ли навигация
+		if not nav_agent.is_navigation_finished():
+			var next_position := nav_agent.get_next_path_position()
+			var nav_direction := (next_position - global_position)
+			nav_direction.y = 0.0
+			
+			if nav_direction.length() > 0.001:
+				nav_direction = nav_direction.normalized()
+				velocity = nav_direction * move_speed * slow_multiplier
+				look_at(global_position + nav_direction, Vector3.UP)
 				return
 		
-		# Получаем следующую точку пути от навигации
-		var next_position := nav_agent.get_next_path_position()
-		var direction := (next_position - global_position)
-		direction.y = 0.0
+		# Если навигация завершена или не дает путь, идем напрямую к цели
+		if distance_to_target > nav_target_distance:
+			var direct_direction := (point - global_position)
+			direct_direction.y = 0.0
+			if direct_direction.length() > 0.001:
+				direct_direction = direct_direction.normalized()
+				velocity = direct_direction * move_speed * slow_multiplier
+				look_at(global_position + direct_direction, Vector3.UP)
+				return
 		
-		if direction.length() > 0.001:
-			direction = direction.normalized()
-			velocity = direction * move_speed * slow_multiplier
-			look_at(global_position + direction, Vector3.UP)
-		else:
-			velocity = Vector3.ZERO
+		# Достигли цели
+		velocity = Vector3.ZERO
+		return
+	
+	# Если навигация недоступна, идем напрямую (fallback)
+	var fallback_direction := (point - global_position)
+	fallback_direction.y = 0.0
+	if fallback_direction.length() > 0.001:
+		fallback_direction = fallback_direction.normalized()
+		velocity = fallback_direction * move_speed * slow_multiplier
+		look_at(global_position + fallback_direction, Vector3.UP)
 	else:
-		# Если навигация недоступна, идем напрямую (fallback)
-		var direction := (point - global_position)
-		direction.y = 0.0
-		if direction.length() > 0.001:
-			direction = direction.normalized()
-			velocity = direction * move_speed * slow_multiplier
-			look_at(global_position + direction, Vector3.UP)
+		velocity = Vector3.ZERO
 
 func face_point(point: Vector3) -> void:
 	var direction := point - global_position

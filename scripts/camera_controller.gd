@@ -7,11 +7,11 @@ class_name CameraController
 @export var drag_speed := 0.05
 @export var min_zoom := 10.0
 @export var max_zoom := 28.0
-@export var zoom_step := 2.0
+@export var zoom_step := 4.0
 @export var zoom_smooth := 12.0
 @export var use_bounds := true
-@export var bounds_min := Vector3(-90, 0, -90)
-@export var bounds_max := Vector3(90, 0, 90)
+@export var bounds_min := Vector3(-120, 0, -120)
+@export var bounds_max := Vector3(120, 0, 120)
 @export var camera_collision_mask := 1
 @export var camera_collision_radius := 0.4
 @export var camera_collision_margin := 0.05
@@ -19,10 +19,12 @@ class_name CameraController
 @export var zoom_block_ray_offset := 1.2
 @export var zoom_block_margin := 0.2
 @export var spring_collision_enabled := false
+@export var rotation_speed := 2.0
 
 @onready var spring_arm: SpringArm3D = $SpringArm3D
 var target: Node3D
 var drag_active := false
+var rotate_active := false
 var zoom_target: float = 0.0
 
 func set_target(node: Node3D) -> void:
@@ -36,7 +38,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var move_vector: Vector3 = Vector3.ZERO
-	if not drag_active:
+	if not drag_active and not rotate_active:
 		var viewport: Viewport = get_viewport()
 		var mouse_pos: Vector2 = viewport.get_mouse_position()
 		var size: Vector2 = viewport.get_visible_rect().size
@@ -71,12 +73,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
 			zoom_target = clamp(zoom_target + zoom_step, min_zoom, max_zoom)
 		elif event.button_index == MOUSE_BUTTON_MIDDLE:
-			drag_active = event.pressed
-	elif event is InputEventMouseMotion and drag_active:
-		var delta: Vector2 = event.relative
-		var move: Vector3 = Vector3(delta.x, 0.0, delta.y) * drag_speed
-		global_position += move
-		clamp_to_bounds()
+			if event.pressed:
+				# При зажатии колесика - начинаем вращение
+				rotate_active = true
+				drag_active = false
+			else:
+				# При отпускании - останавливаем вращение
+				rotate_active = false
+	elif event is InputEventMouseMotion:
+		if rotate_active and spring_arm != null:
+			# Вращаем камеру вокруг вертикальной оси
+			var delta: Vector2 = event.relative
+			var rotation_delta: float = -delta.x * rotation_speed * 0.01
+			spring_arm.rotation.y += rotation_delta
+		elif drag_active:
+			var delta: Vector2 = event.relative
+			var move: Vector3 = Vector3(delta.x, 0.0, delta.y) * drag_speed
+			global_position += move
+			clamp_to_bounds()
 	elif event is InputEventMagnifyGesture:
 		var factor: float = event.factor
 		if absf(factor - 1.0) < 0.001:

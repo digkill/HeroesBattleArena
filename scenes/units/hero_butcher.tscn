@@ -1,21 +1,21 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://8x5nwox05cmm"]
 
-[ext_resource type="Script" path="res://scripts/hero.gd" id="1_8v7k0"]
-[ext_resource type="PackedScene" path="res://assets/models/Butcher of the Damned/Butcher of the Damned.glb" id="2_butcher"]
+[ext_resource type="Script" uid="uid://7loycu4i5a47" path="res://scripts/hero.gd" id="1_8v7k0"]
+[ext_resource type="PackedScene" uid="uid://dxrqkhy87mcbj" path="res://assets/models/Butcher of the Damned/Butcher of the Damned.glb" id="2_butcher"]
 [ext_resource type="Resource" path="res://data/heroes/butcher.tres" id="3_butcher"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
-height = 2.0
 radius = 0.6
 
 [node name="ButcherHero" type="CharacterBody3D"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_8v7k0")
 hero_def = ExtResource("3_butcher")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("1")
 
 [node name="ButcherModel" parent="." instance=ExtResource("2_butcher")]
